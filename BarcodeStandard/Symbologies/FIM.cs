@@ -1,44 +1,47 @@
-﻿namespace BarcodeLib.Symbologies
+﻿namespace BarcodeStandard.Symbologies
 {
     /// <summary>
     ///  FIM encoding
     ///  Written by: Brad Barnhill
     /// </summary>
-    class FIM: BarcodeCommon, IBarcode
+    internal class FIM : BarcodeCommon, IBarcode
     {
-        private readonly string[] FIM_Codes = { "110010011", "101101101", "110101011", "111010111" };
-        public enum FIMTypes {FIM_A = 0, FIM_B, FIM_C, FIM_D};
+        private readonly string[] FIM_Codes = ["110010011", "101101101", "110101011", "111010111", "101000101"];
+        public enum FIMTypes {FIM_A = 0, FIM_B, FIM_C, FIM_D, FIM_E};
 
-        public FIM(string input)
+        internal FIM(string input)
         {
             input = input.Trim();
 
             switch (input)
             {
                 case "A":
-                case "a": Raw_Data = FIM_Codes[(int)FIMTypes.FIM_A];
+                case "a": RawData = FIM_Codes[(int)FIMTypes.FIM_A];
                     break;
                 case "B":
-                case "b": Raw_Data = FIM_Codes[(int)FIMTypes.FIM_B];
+                case "b": RawData = FIM_Codes[(int)FIMTypes.FIM_B];
                     break;
                 case "C":
-                case "c": Raw_Data = FIM_Codes[(int)FIMTypes.FIM_C];
+                case "c": RawData = FIM_Codes[(int)FIMTypes.FIM_C];
                     break;
                 case "D":
-                case "d": Raw_Data = FIM_Codes[(int)FIMTypes.FIM_D];
+                case "d": RawData = FIM_Codes[(int)FIMTypes.FIM_D];
                     break;
-                default: Error("EFIM-1: Could not determine encoding type. (Only pass in A, B, C, or D)");
+                case "E":
+                case "e": RawData = FIM_Codes[(int)FIMTypes.FIM_E];
                     break;
-            }//switch
+                default: Error("EFIM-1: Could not determine encoding type. (Only pass in A, B, C, D, or E)");
+                    break;
+            }
         }
 
-        public string Encode_FIM()
+        internal string Encode_FIM()
         {
             string encoded = "";
             foreach (char c in RawData)
             {
                 encoded += c + "0";
-            }//foreach
+            }
 
             encoded = encoded.Substring(0, encoded.Length - 1);
 

@@ -1,12 +1,12 @@
 ﻿using System;
 
-namespace BarcodeLib.Symbologies
+namespace BarcodeStandard.Symbologies
 {
     /// <summary>
     ///  Blank encoding template
     ///  Written by: Brad Barnhill
     /// </summary>
-    class Blank: BarcodeCommon, IBarcode
+    internal class Blank: BarcodeCommon, IBarcode
     {
         
         #region IBarcode Members

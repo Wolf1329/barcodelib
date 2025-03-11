@@ -1,39 +1,38 @@
 using System;
 using System.Collections.Generic;
 
-namespace BarcodeLib
+namespace BarcodeStandard
 {
-    abstract class BarcodeCommon
+    internal abstract class BarcodeCommon
     {
-        protected string Raw_Data = "";
-        protected List<string> _Errors = new List<string>();
+        public string RawData { get; protected set; } = "";
+        public List<string> Errors { get; } = [];
 
-        public string RawData
+        protected void Error(string errorMessage)
         {
-            get { return this.Raw_Data; }
-        }
-
-        public List<string> Errors
-        {
-            get { return this._Errors; }
-        }
-
-        public void Error(string errorMessage)
-        {
-            this._Errors.Add(errorMessage);
+            Errors.Add(errorMessage);
             throw new Exception(errorMessage);
         }
 
-        internal static bool CheckNumericOnly(string data)
+        internal static bool IsNumericOnly(string s)
         {
-            for (var i = 0; i < data.Length; i++)
-            {
-                if (!char.IsDigit(data[i]))
-                {
+            if (s == null || s == "") return false;
+
+            for (int i = 0; i < s.Length; i++)
+                if ((s[i] ^ '0') > 9)
                     return false;
-                }
-            }
-            return data.Length > 0;
+
+            return true;
+        }
+
+        internal static int GetAlignmentShiftAdjustment(Barcode barcode)
+        {
+            return barcode.Alignment switch
+            {
+                AlignmentPositions.Left => 0,
+                AlignmentPositions.Right => (barcode.Width % barcode.EncodedValue.Length),
+                _ => (barcode.Width % barcode.EncodedValue.Length) / 2,
+            };
         }
     }//BarcodeVariables abstract class
-}//namespace
+}

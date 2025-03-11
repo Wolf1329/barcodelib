@@ -1,15 +1,15 @@
 ﻿using System;
 using System.Collections;
 
-namespace BarcodeLib.Symbologies
+namespace BarcodeStandard.Symbologies
 {
     /// <summary>
     ///  Telepen encoding
     ///  Written by: Brad Barnhill
     /// </summary>
-    class Telepen: BarcodeCommon, IBarcode
+    internal class Telepen : BarcodeCommon, IBarcode
     {
-        private static readonly Hashtable Telepen_Code = new Hashtable();
+        private static readonly Hashtable Telepen_Code = [];
         private enum StartStopCode : int { START1, STOP1, START2, STOP2, START3, STOP3 };
         private StartStopCode _startCode = StartStopCode.START1;
         private StartStopCode _stopCode = StartStopCode.STOP1;
@@ -20,9 +20,9 @@ namespace BarcodeLib.Symbologies
         /// Encodes data using the Telepen algorithm.
         /// </summary>
         /// <param name="input"></param>
-        public Telepen(string input)
+        internal Telepen(string input)
         {
-            Raw_Data = input;
+            RawData = input;
         }
 
         /// <summary>
@@ -35,13 +35,10 @@ namespace BarcodeLib.Symbologies
                 Init_Telepen();
 
             _iCheckSum = 0;
-            var result = "";
-
             SetEncodingSequence();
 
             //include the Start sequence pattern
-            result = Telepen_Code[_startCode].ToString();
-
+            string result = Telepen_Code[_startCode].ToString();
             switch (_startCode)
             { 
                 //numeric --> ascii
@@ -52,7 +49,7 @@ namespace BarcodeLib.Symbologies
                     {
                         EncodeSwitchMode(ref result);
                         EncodeASCII(RawData.Substring(_switchModeIndex), ref result);
-                    }//if
+                    }
                     break;
                 //ascii --> numeric
                 case StartStopCode.START3:
@@ -64,7 +61,7 @@ namespace BarcodeLib.Symbologies
                 default:
                     EncodeASCII(RawData, ref result);
                     break;
-            }//switch
+            }
 
             //checksum
             result += Telepen_Code[Calculate_Checksum(_iCheckSum)];
@@ -73,7 +70,7 @@ namespace BarcodeLib.Symbologies
             result += Telepen_Code[_stopCode];
 
             return result;
-        }//Encode_Telepen
+        }
 
         private void EncodeASCII(string input, ref string output)
         {
@@ -83,12 +80,12 @@ namespace BarcodeLib.Symbologies
                 {
                     output += Telepen_Code[c];
                     _iCheckSum += Convert.ToInt32(c);
-                }//foreach
-            }//try
+                }
+            }
             catch 
             {
                 Error("ETELEPEN-1: Invalid data when encoding ASCII");
-            }//catch
+            }
         }
         private void EncodeNumeric(string input, ref string output)
         {
@@ -101,12 +98,12 @@ namespace BarcodeLib.Symbologies
                 {
                     output += Telepen_Code[Convert.ToChar(Int32.Parse(input.Substring(i, 2)) + 27)];
                     _iCheckSum += Int32.Parse(input.Substring(i, 2)) + 27;
-                }//for
-            }//try
+                }
+            }
             catch
             {
                 Error("ETELEPEN-2: Numeric encoding failed");
-            }//catch
+            }
         }
         private void EncodeSwitchMode(ref string output)
         {
@@ -118,45 +115,45 @@ namespace BarcodeLib.Symbologies
         private char Calculate_Checksum(int iCheckSum)
         {
             return Convert.ToChar(127 - (iCheckSum % 127));
-        }//Calculate_Checksum(string)
+        }
 
         private void SetEncodingSequence()
         {
             //reset to full ascii
             _startCode = StartStopCode.START1;
             _stopCode = StartStopCode.STOP1;
-            _switchModeIndex = Raw_Data.Length;
+            _switchModeIndex = RawData.Length;
 
             //starting number of 'numbers'
             var StartNumerics = 0;
-            foreach (var c in Raw_Data)
+            foreach (var c in RawData)
             {
                 if (Char.IsNumber(c))
                     StartNumerics++;
                 else
                     break;
-            }//foreach
+            }
 
-            if (StartNumerics == Raw_Data.Length)
+            if (StartNumerics == RawData.Length)
             {
                 //Numeric only mode due to only numbers being present
                 _startCode = StartStopCode.START2;
                 _stopCode = StartStopCode.STOP2;
 
-                if ((Raw_Data.Length % 2) > 0)
+                if ((RawData.Length % 2) > 0)
                     _switchModeIndex = RawData.Length - 1;
-            }//if
+            }
             else
             {
                 //ending number of numbers
                 var EndNumerics = 0;
-                for (var i = Raw_Data.Length - 1; i >= 0; i--)
+                for (var i = RawData.Length - 1; i >= 0; i--)
                 {
-                    if (Char.IsNumber(Raw_Data[i]))
+                    if (Char.IsNumber(RawData[i]))
                         EndNumerics++;
                     else
                         break;
-                }//for
+                }
 
                 if (StartNumerics >= 4 || EndNumerics >= 4)
                 {
@@ -167,17 +164,17 @@ namespace BarcodeLib.Symbologies
                         _startCode = StartStopCode.START2;
                         _stopCode = StartStopCode.STOP2;
                         _switchModeIndex = (StartNumerics % 2) == 1 ? StartNumerics - 1 : StartNumerics;
-                    }//if
+                    }
                     else
                     { 
                         //start in ascii switching to numeric
                         _startCode = StartStopCode.START3;
                         _stopCode = StartStopCode.STOP3;
-                        _switchModeIndex = (EndNumerics % 2) == 1 ? Raw_Data.Length - EndNumerics + 1 : Raw_Data.Length - EndNumerics;
-                    }//else
-                }//if
-            }//else
-        }//SetEncodingSequence
+                        _switchModeIndex = (EndNumerics % 2) == 1 ? RawData.Length - EndNumerics + 1 : RawData.Length - EndNumerics;
+                    }
+                }
+            }
+        }
 
         private void Init_Telepen()
         {

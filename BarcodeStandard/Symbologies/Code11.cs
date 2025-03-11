@@ -1,49 +1,49 @@
 using System;
 
-namespace BarcodeLib.Symbologies
+namespace BarcodeStandard.Symbologies
 {
     /// <summary>
     ///  Code 11 encoding
     ///  Written by: Brad Barnhill
     /// </summary>
-    class Code11 : BarcodeCommon, IBarcode
+    internal class Code11 : BarcodeCommon, IBarcode
     {
-        private readonly string[] C11_Code = { "101011", "1101011", "1001011", "1100101", "1011011", "1101101", "1001101", "1010011", "1101001", "110101", "101101", "1011001" };
+        private readonly string[] C11_Code = ["101011", "1101011", "1001011", "1100101", "1011011", "1101101", "1001101", "1010011", "1101001", "110101", "101101", "1011001"];
 
-        public Code11(string input)
+        internal Code11(string input)
         {
-            Raw_Data = input;
-        }//Code11
+            RawData = input;
+        }
         /// <summary>
         /// Encode the raw data using the Code 11 algorithm.
         /// </summary>
         private string Encode_Code11()
         {
-            if (!CheckNumericOnly(Raw_Data.Replace("-", "")))
+            if (!IsNumericOnly(RawData.Replace("-", "")))
                 Error("EC11-1: Numeric data and '-' Only");
 
             //calculate the checksums
             var weight = 1;
             var cTotal = 0;
-            var dataToEncodeWithChecksums = Raw_Data;
+            var dataToEncodeWithChecksums = RawData;
 
             //figure the C checksum
-            for (var i = Raw_Data.Length - 1; i >= 0; i--)
+            for (var i = RawData.Length - 1; i >= 0; i--)
             {
                 //C checksum weights go 1-10
                 if (weight == 10) weight = 1;
 
-                if (Raw_Data[i] != '-')
-                    cTotal += Int32.Parse(Raw_Data[i].ToString()) * weight++;
+                if (RawData[i] != '-')
+                    cTotal += Int32.Parse(RawData[i].ToString()) * weight++;
                 else
                     cTotal += 10 * weight++;
-            }//for
+            }
             var checksumC = cTotal % 11;
 
             dataToEncodeWithChecksums += checksumC.ToString();
 
             //K checksums are recommended on any message length greater than or equal to 10
-            if (Raw_Data.Length >= 10)
+            if (RawData.Length >= 10)
             {
                 weight = 1;
                 var kTotal = 0;
@@ -58,10 +58,10 @@ namespace BarcodeLib.Symbologies
                         kTotal += Int32.Parse(dataToEncodeWithChecksums[i].ToString()) * weight++;
                     else
                         kTotal += 10 * weight++;
-                }//for
+                }
                 var checksumK = kTotal % 11;
                 dataToEncodeWithChecksums += checksumK.ToString();
-            }//if
+            }
 
             //encode data
             var space = "0";
@@ -74,18 +74,18 @@ namespace BarcodeLib.Symbologies
 
                 //inter-character space
                 result += space;
-            }//foreach
+            }
 
             //stop bars
             result += C11_Code[11];
 
             return result;
-        }//Encode_Code11 
+        }
 
         #region IBarcode Members
 
         public string Encoded_Value => Encode_Code11();
 
         #endregion
-    }//class
-}//namespace
+    }
+}

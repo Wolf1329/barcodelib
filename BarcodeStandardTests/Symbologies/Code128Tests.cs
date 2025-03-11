@@ -1,16 +1,17 @@
-﻿using BarcodeLib;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Linq;
+using BarcodeStandard;
+using Type = BarcodeStandard.Type;
 
 namespace BarcodeStandardTests.Symbologies
 {
     [TestClass]
     public class Code128Tests
     {
-        readonly Barcode barcode = new Barcode
+        private readonly Barcode _barcode = new()
         {
-            EncodedType = TYPE.CODE128,
+            EncodedType = Type.Code128,
         };
 
         [DataTestMethod]
@@ -18,7 +19,7 @@ namespace BarcodeStandardTests.Symbologies
         [DataRow("12094568792", "1101001110010110011100110010010001011101100010000100110100011110101110101111011001110010110111001001100011101011", "110100001001001110011011001110010100111011001110010110011001001110110111001001100111010011101001100111011011101110010110011001110010110110111101100011101011", "110100100001001110011011001110010100111011001110010110011001001110110111001001100111010011101001100111011011101110010110011001110010110111101101100011101011", "11010011100110011011001100100111010001011110111000101101111001010010101111000100010111101100011101011")]
         [DataRow("121234349090", "11010011100101100111001011001110010001011000100010110001101111011011011110110110110110001100011101011", "11010000100100111001101100111001010011100110110011100101100101110011001001110110010111001100100111011100101100100111011001110010110010011101100100010111101100011101011", "11010010000100111001101100111001010011100110110011100101100101110011001001110110010111001100100111011100101100100111011001110010110010011101100101111010001100011101011", "11010011100101100111001011001110010001011000100010110001101111011011011110110110110110001100011101011")]
         [DataRow("thisisalongerstring1212121212", "1101001000010011110100100110000101000011010010111100100100001101001011110010010010110000110010100001000111101011000010100100110100001011001000010010011110101111001001001111010010010011110100001101001100001010010011010000101110111101011001110010110011100101100111001011001110010110011100100011000101100011101011", null, "110100100001001111010010011000010100001101001011110010010000110100101111001001001011000011001010000100011110101100001010010011010000101100100001001001111010111100100100111101001001001111010000110100110000101001001101000010011100110110011100101001110011011001110010100111001101100111001010011100110110011100101001110011011001110010110001000101100011101011", null)]
-        [DataRow("fighting!", "1101001000010110000100100001101001001101000010011000010100111101001000011010011000010100100110100001110101111011001101100100100011001100011101011", null, "11010010000101100001001000011010010011010000100110000101001111010010000110100110000101001001101000011001101100110111001001100011101011", null)]
+        [DataRow("fighting!", "11010010000101100001001000011010010011010000100110000101001111010010000110100110000101001001101000011001101100110111001001100011101011", null, "11010010000101100001001000011010010011010000100110000101001111010010000110100110000101001001101000011001101100110111001001100011101011", null)]
         [DataRow("파이팅!", null, null, null, null)]
         [DataRow("ファイト！", null, null, null, null)]
         [DataRow("\u0012", "1101000010010010011110100100111101100011101011", "1101000010010010011110100100111101100011101011", null, null)]
@@ -31,26 +32,26 @@ namespace BarcodeStandardTests.Symbologies
             string expectedB,
             string expectedC)
         {
-            void assertByType(
-                TYPE type,
+            void AssertByType(
+                Type type,
                 string expected)
             {
-                barcode.EncodedType = type;
+                _barcode.EncodedType = type;
 
                 string actual = null;
                 try
                 {
-                    actual = barcode.GenerateBarcode(data);
+                    actual = _barcode.GenerateBarcode(data);
                 }
                 catch when (expected == null)
                 {
                 }
                 Assert.AreEqual(expected, actual, $"{type}");
             }
-            assertByType(TYPE.CODE128, expectedAuto);
-            assertByType(TYPE.CODE128A, expectedA);
-            assertByType(TYPE.CODE128B, expectedB);
-            assertByType(TYPE.CODE128C, expectedC);
+            AssertByType(Type.Code128, expectedAuto);
+            AssertByType(Type.Code128A, expectedA);
+            AssertByType(Type.Code128B, expectedB);
+            AssertByType(Type.Code128C, expectedC);
         }
 
         /// <summary>
@@ -74,7 +75,7 @@ namespace BarcodeStandardTests.Symbologies
                 "this\u0012is\u0014weird",
             })
             {
-                string represent(
+                string Represent(
                     string s)
                 {
                     if (s == null) return "null";
@@ -86,15 +87,15 @@ namespace BarcodeStandardTests.Symbologies
                         return c.ToString();
                     })) + "\"";
                 }
-                string tryByType(
-                    TYPE type)
+                string TryByType(
+                    Type type)
                 {
-                    return represent(new Func<string>(() =>
+                    return Represent(new Func<string>(() =>
                     {
                         try
                         {
-                            barcode.EncodedType = type;
-                            return barcode.GenerateBarcode(x);
+                            _barcode.EncodedType = type;
+                            return _barcode.GenerateBarcode(x);
                         }
                         catch
                         {
@@ -102,7 +103,7 @@ namespace BarcodeStandardTests.Symbologies
                         }
                     })());
                 }
-                Console.WriteLine($"        [DataRow({represent(x)}, {tryByType(TYPE.CODE128)}, {tryByType(TYPE.CODE128A)}, {tryByType(TYPE.CODE128B)}, {tryByType(TYPE.CODE128C)})]");
+                Console.WriteLine($"        [DataRow({Represent(x)}, {TryByType(Type.Code128)}, {TryByType(Type.Code128A)}, {TryByType(Type.Code128B)}, {TryByType(Type.Code128C)})]");
             }
         }
     }
